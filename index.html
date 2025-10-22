@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <link rel="icon" type="image/png" href="paw.png">
+        <title> Jester :3</title>
+        <script src="https://cdn.tailwindcss.com"></script>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+        <style>
+            /* --- COLOR VARIABLES (Shared) --- */
+            :root {
+                --deep-magenta: #C51162; 
+                --dark-bg: #0A0A0A; 
+                --dot-color: #790D3E;
+                --bg-music-volume: 0.15; 
+                --page-transition-duration: 400ms; 
+            }
+
+            /* --- CORE STYLES --- */
+            body {
+                cursor: default;
+                width: 100vw; 
+                height: 100vh;
+                overflow: hidden; 
+                display: block; 
+                position: relative;
+                /* Set the base background color before the pattern loads */
+                background-color: var(--dark-bg);
+            }
+
+            /* --- DOTTED BACKGROUND STYLE (Main Content) --- */
+            .bg-pattern {
+                background-color: var(--dark-bg);
+                background-image: radial-gradient(var(--dot-color) 2px, transparent 0);
+                background-size: 30px 30px;
+                width: 100%;
+                height: 100%;
+                position: fixed;
+                top: 0;
+                left: 0;
+            }
+
+            /* --- MAIN PAGE COMPONENTS (Unchanged) --- */
+            .tilt-card {
+                perspective: 2500px;
+                transform-style: preserve-3d;
+                transition: transform 200ms ease-out; 
+                width: 1000px; 
+                height: 500px;
+                background-size: cover; 
+                background-repeat: no-repeat;
+                background-position: center;
+                z-index: 10;
+            }
+            #page-slider-wrapper {
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100vw; 
+                height: 100vh; 
+                overflow: hidden;
+                display: flex; 
+                align-items: center;
+                justify-content: flex-start; 
+                /* Hide main content until splash is cleared */
+                opacity: 0; 
+                transition: opacity 0.5s ease-in-out; 
+            }
+            #page-slider {
+                display: flex;
+                width: 400vw; 
+                height: 100vh;
+                transition: transform var(--page-transition-duration) ease-in-out;
+            }
+            .page {
+                width: 100vw; 
+                height: 100vh; 
+                flex-shrink: 0; 
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                position: relative;
+                padding: 4rem; 
+                color: #fff;
+            }
+            .page-content {
+                max-width: 600px;
+                width: 100%;
+                text-align: center;
+            }
+            .dot {
+                width: 12px;
+                height: 12px;
+                background-color: var(--dot-color);
+                border-radius: 50%;
+                transition: background-color var(--page-transition-duration) ease-in-out, transform 0.3s ease;
+                cursor: pointer;
+                margin: 0 5px;
+            }
+            .dot.active {
+                background-color: var(--deep-magenta);
+                transform: scale(1.2);
+            }
+            .interactive-text {
+                cursor: pointer;
+                transition: color 0.2s ease, text-shadow 0.2s ease;
+                display: inline-block;
+                color: var(--deep-magenta); 
+                font-weight: bold;
+            }
+            .interactive-text:hover {
+                color: #fff;
+                text-shadow: 0 0 8px var(--deep-magenta);
+            }
+            /* Glowing Button Styles (Included from previous version) */
+            .glowing-btn {
+                position: relative;
+                width: 60px;
+                height: 60px; 
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                background: transparent;
+                border-radius: 50%; 
+                border: 1px solid var(--deep-magenta); 
+                color: var(--deep-magenta);
+                overflow: hidden;
+                text-decoration: none; 
+                transition: color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
+                z-index: 20; 
+                cursor: pointer;
+            }
+            .glowing-btn i { font-size: 24px; }
+            .glowing-btn:hover {
+                color: #fff;
+                border-color: #fff;
+                box-shadow: 0 0 5px var(--deep-magenta); 
+                transform: scale(1.1);
+            }
+            .glowing-btn::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: var(--deep-magenta); 
+                z-index: -1;
+                transform: scale(0);
+                border-radius: inherit; 
+                transition: transform 0.5s cubic-bezier(0.1, 1, 0.5, 1);
+            }
+            .glowing-btn:hover::before {
+                transform: scale(1.5);
+                box-shadow: 0 0 10px var(--deep-magenta), 0 0 20px var(--deep-magenta), 0 0 40px var(--deep-magenta);
+            }
+            .confetti-heart {
+                position: absolute;
+                font-size: 18px; 
+                pointer-events: none; 
+                opacity: 0;
+                transition: transform 0.8s ease-out, opacity 0.8s ease-out; 
+                line-height: 1; 
+            }
+
+            /* ---------------------------------------------------- */
+            /* --- SPLASH SCREEN --- */
+            /* ---------------------------------------------------- */
+            .splash-overlay {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background-color: rgba(0, 0, 0, 0.7); 
+                backdrop-filter: blur(5px);
+                -webkit-backdrop-filter: blur(5px);
+                z-index: 100; /* Ensure it covers everything */
+                transition: opacity 0.4s ease-out, visibility 0.4s; 
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+            }
+            .splash-content {
+                transition: opacity 0.2s ease-out;
+            }
+            
+            /* Pulsating Glow Animation */
+            @keyframes pulse-glow {
+                0%, 100% { 
+                    text-shadow: 0 0 5px rgba(197, 17, 98, 0.5), 0 0 10px rgba(197, 17, 98, 0.2); 
+                    opacity: 1;
+                }
+                50% { 
+                    text-shadow: 0 0 10px var(--deep-magenta), 0 0 20px rgba(197, 17, 98, 0.7); 
+                    opacity: 0.95;
+                }
+            }
+            .splash-content h1, .splash-content p {
+                animation: pulse-glow 4s ease-in-out infinite alternate;
+            }
+            .splash-content p {
+                animation-delay: 0.5s;
+            }
+
+            /* VIEW Button Styling */
+            .view-btn {
+                position: relative;
+                width: 200px; 
+                height: 70px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                background: transparent;
+                border-radius: 12px; 
+                border: 2px solid var(--deep-magenta); 
+                color: var(--deep-magenta);
+                font-size: 1.5rem; 
+                font-weight: bold;
+                letter-spacing: 2px;
+                overflow: hidden;
+                text-decoration: none; 
+                transition: color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease, opacity 0.2s ease-out;
+                z-index: 20; 
+                cursor: pointer;
+            }
+            .view-btn:hover {
+                color: #fff;
+                border-color: #fff;
+                box-shadow: 0 0 10px var(--deep-magenta); 
+                transform: scale(1.05);
+            }
+            .view-btn::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: var(--deep-magenta); 
+                z-index: -1;
+                transform: scale(0);
+                border-radius: inherit; 
+                transition: transform 0.5s cubic-bezier(0.1, 1, 0.5, 1);
+            }
+            .view-btn:hover::before {
+                transform: scale(1.0); 
+                box-shadow: 0 0 10px var(--deep-magenta), 0 0 20px var(--deep-magenta);
+            }
+
+        </style>
+    </head>
+    <body>
+        <div class="bg-pattern"></div>
+        
+        <audio id="bgMusic" loop src="Meowsong.mp3"></audio> 
+        <div id="confetti-container" class="absolute inset-0 pointer-events-none z-50"></div>
+
+        <div class="absolute inset-0 flex items-center justify-between p-10 z-30 pointer-events-none">
+            <a href="javascript:void(0)" class="glowing-btn sound-button pointer-events-auto" id="prev-btn">
+                <i class="fas fa-chevron-left"></i>
+            </a>
+            <a href="javascript:void(0)" class="glowing-btn sound-button pointer-events-auto" id="next-btn">
+                <i class="fas fa-chevron-right"></i>
+            </a>
+        </div>
+
+        <div class="absolute bottom-10 left-1/2 transform -translate-x-1/2 flex space-x-6 z-30">
+            <a href="https://github.com/JesterCat533" target="_blank" class="glowing-btn sound-button">
+                <i class="fab fa-github"></i>
+            </a>
+            <a href="https://steamcommunity.com/profiles/76561198262922451/" target="_blank" class="glowing-btn sound-button">
+                <i class="fab fa-steam"></i>
+            </a>
+            <a href="https://discordapp.com/users/1393676537160667199" target="_blank" class="glowing-btn sound-button">
+                <i class="fab fa-discord"></i>
+            </a>
+        </div>
+
+        <div class="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-3 z-30" id="dot-container">
+            </div>
+
+        <div id="page-slider-wrapper">
+            <div id="page-slider">
+                
+                <div class="page">
+                    <div id="tilt-card" class="tilt-card" style="background-image: url('JesterPink.png');">
+                    </div>
+                </div>
+
+                <div class="page">
+                    <div class="page-content text-white">
+                        <h1 class="text-5xl font-extrabold mb-8 text-white" style="text-shadow: 0 0 15px var(--deep-magenta);">
+                            About <span class="text-deep-magenta">Me :3</span> 🃏
+                        </h1>
+                        <p class="text-xl mb-6 text-gray-300">
+                            Hewwo! I'm Jester &lt;3 im an amateur developer and somewhat of a designer! i have a passion for many uh... things...! :3 <span class="interactive-text" onclick="alert('Cuz im a femboy furry so yeahhhh... :3');">I am a wittle weird &gt;w&lt;</span> I dabble in projects A LOT and love trying out new things such as this whole project! Meow-
+                        </p>
+                        <p class="text-xl text-gray-300">
+                            My interests include Games and a heavy dose of random genres of music and learning new stuffs, i also enjoy <span class="interactive-text" onclick="console.log('You found a hidden interaction!'); alert('Such as basketball X3');">Sports</span> :P
+                        </p>
+                    </div>
+                </div>
+
+                <div class="page">
+                    <div class="page-content text-white">
+                        <h1 class="text-5xl font-extrabold mb-8 text-white" style="text-shadow: 0 0 15px var(--deep-magenta);">
+                            My <span class="text-deep-magenta">Projects</span> &lt;/&gt;
+                        </h1>
+                        <p class="text-xl mb-6 text-gray-300">
+                            I primarily work on private unfinished projects and random coding stuff, ive made a couple actual good games, yet not good enough to brag about xd. Check out my <a href="https://github.com/JesterCat533" target="_blank" class="interactive-text">GitHub</a> for some of my random code which prolly dont even make sense LOL.
+                        </p>
+                        <p class="text-xl text-gray-300">
+                            My current focus is improving in html, css and js, as of rn all ive made is this website :3 - tho im quite happy with how it turned out! at the moment my best <span class="interactive-text" onclick="alert('Lua. Luau. C#. Godot. Blueprints for unreal. Batch and Python :3');">Coding languages</span> are these ♡
+                        </p>
+                    </div>
+                </div>
+
+                <div class="page">
+                    <div class="page-content text-white">
+                        <h1 class="text-5xl font-extrabold mb-8 text-white" style="text-shadow: 0 0 15px var(--deep-magenta);">
+                            Get in <span class="text-deep-magenta">Touch</span> ❤️
+                        </h1>
+                        <p class="text-xl mb-6 text-gray-300">
+                            The best way to reach me is through Discord :3 Tho for any colabs or something work related reach out to me via <a href="https://mailto:chri9g04@gmail.com" target="_blank" class="interactive-text">Mail</a>. Don't be afraid to add me... I dont bite :C
+                        </p>
+                        <p class="text-xl text-gray-300">
+                            Remember to check out my socials below to reach me :3 I appreciate any feedback or support!
+                        </p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+        
+        <div id="splash-screen" class="splash-overlay">
+            <div id="splash-content-container" class="max-w-xl mb-16 px-4 z-10 splash-content">
+                <h1 class="text-4xl md:text-5xl font-extrabold mb-4 leading-tight text-center" style="color: var(--deep-magenta);">
+                    Jester Cat's hub :3
+                </h1>
+                <p class="text-lg text-gray-300 text-center">
+                    I'm Jester, a small dev, gamer and a weird ahh femboy :3 This is my website! 
+                    designed in heaps of pain.. Meow...
+                    Here u can uh, read about me and my stuffs ig -3-
+                </p>
+                <p class="text-lg text-gray-300 text-center">
+                    Took a bit of insperation from my good friend t3mp &gt;3&lt; go check him out aswell! --&gt; <a href="https://www.t3mp.co.uk/?i=1" target="_blank" class="interactive-text">t3mp &lt;3</a>
+                </p>
+            </div>
+            <button id="view-button" class="view-btn">
+                View
+            </button>
+        </div>
+
+
+        <script>
+            let audioStarted = false;
+            let bgMusic; 
+            let currentPage = 0; 
+            const totalPages = 4;
+            let isTransitioning = false; 
+            const TRANSITION_DURATION = 400; 
+
+            const HOVER_SOUND_SRC = 'hover.mp3';
+            const CLICK_SOUND_SRC = 'click.mp3';
+            const SPLASH_BUTTON_SFX_SRC = 'click.mp3'; // Using click.mp3 for the splash button
+
+            // --- Function to start Background Music ---
+            window.startAudio = function() {
+                if (audioStarted) return;
+                
+                if (bgMusic) {
+                    const rootStyles = getComputedStyle(document.documentElement);
+                    const volume = parseFloat(rootStyles.getPropertyValue('--bg-music-volume'));
+                    
+                    bgMusic.volume = isNaN(volume) ? 0.3 : volume; 
+                    bgMusic.play().then(() => {
+                        audioStarted = true;
+                    }).catch(e => {
+                        console.error("Autoplay prevented or music failed to play:", e);
+                    });
+                }
+            };
+            
+            // --- SFX Playback Function ---
+            const playSound = (src) => {
+                const audio = new Audio(src);
+                audio.volume = 1.0; 
+                audio.play().catch(e => console.log("SFX playback failed:", e));
+            };
+
+            // =================================================================
+            // === Confetti Hearts Logic (Unchanged) ===
+            // =================================================================
+            const createConfetti = (button) => {
+                const rect = button.getBoundingClientRect();
+                const container = document.getElementById('confetti-container');
+                const numHearts = 10;
+                const heartEmojis = ['❤️', '🖤', '🤍']; 
+
+                for (let i = 0; i < numHearts; i++) {
+                    const heart = document.createElement('span'); 
+                    heart.className = 'confetti-heart';
+                    heart.textContent = heartEmojis[Math.floor(Math.random() * heartEmojis.length)]; 
+                    
+                    const containerRect = container.getBoundingClientRect();
+                    
+                    const angle = Math.random() * 2 * Math.PI;
+                    const radius = (button.offsetWidth / 2) - 10; 
+                    const startX = rect.x + rect.width / 2 + radius * Math.cos(angle) - containerRect.x;
+                    const startY = rect.y + rect.height / 2 + radius * Math.sin(angle) - containerRect.y;
+
+                    const endDistance = 40 + Math.random() * 30; 
+                    const endX = startX + endDistance * Math.cos(angle);
+                    const endY = startY + endDistance * Math.sin(angle);
+
+                    heart.style.left = `${startX}px`;
+                    heart.style.top = `${startY}px`;
+                    heart.style.transform = 'scale(0)';
+                    
+                    container.appendChild(heart);
+
+                    void heart.offsetWidth; 
+
+                    heart.style.opacity = '0.9';
+                    const rotation = Math.random() * 360; 
+                    heart.style.transitionDuration = `${0.5 + Math.random() * 0.5}s`; 
+                    heart.style.transform = `translate(${endX - startX}px, ${endY - startY}px) scale(1) rotate(${rotation}deg)`;
+
+                    setTimeout(() => {
+                        heart.style.opacity = '0';
+                        setTimeout(() => {
+                            heart.remove();
+                        }, 800); 
+                    }, 100); 
+                }
+            };
+            // =================================================================
+
+
+            // --- Page Navigation Logic (Unchanged) ---
+            const updatePage = (newIndex) => {
+                if (isTransitioning) return;
+                
+                let targetPage = newIndex % totalPages;
+                if (targetPage < 0) {
+                    targetPage = totalPages - 1;
+                }
+
+                if (targetPage === currentPage) return;
+                
+                isTransitioning = true;
+                playSound(CLICK_SOUND_SRC); 
+                currentPage = targetPage;
+
+                const slider = document.getElementById('page-slider');
+                slider.style.transform = `translateX(-${currentPage * 100}vw)`;
+
+                updateDots(currentPage);
+                
+                setTimeout(() => {
+                    isTransitioning = false;
+                }, TRANSITION_DURATION); 
+            };
+            
+            const navigateNext = () => updatePage(currentPage + 1);
+            const navigatePrev = () => updatePage(currentPage - 1);
+
+            // --- Dot Indicator Logic (Unchanged) ---
+            const createDots = () => {
+                const container = document.getElementById('dot-container');
+                container.innerHTML = ''; 
+                for (let i = 0; i < totalPages; i++) {
+                    const dot = document.createElement('div');
+                    dot.className = 'dot';
+                    dot.setAttribute('data-index', i);
+                    dot.addEventListener('click', () => {
+                        updatePage(i);
+                    });
+                    container.appendChild(dot);
+                }
+                updateDots(currentPage);
+            };
+
+            const updateDots = (index) => {
+                const dots = document.querySelectorAll('.dot');
+                dots.forEach((dot, i) => {
+                    dot.classList.toggle('active', i === index);
+                });
+            };
+            
+            // --- Tilt Logic (Unchanged) ---
+            const handleTilt = (e) => {
+                if (currentPage !== 0) return; 
+                const card = document.getElementById('tilt-card');
+                const width = window.innerWidth;
+                const height = window.innerHeight;
+                const maxRotation = 7;
+                const scaleFactor = 1.05;
+
+                const centerX = width / 2;
+                const centerY = height / 2;
+                const mouseX = (e.clientX - centerX) / width;
+                const mouseY = (e.clientY - centerY) / height;
+
+                const rotateY = mouseX * maxRotation * 2;
+                const rotateX = -mouseY * maxRotation * 2;
+                
+                const clampedRotateX = Math.max(-maxRotation, Math.min(maxRotation, rotateX));
+                const clampedRotateY = Math.max(-maxRotation, Math.min(maxRotation, rotateY));
+
+                card.style.transform = `
+                    perspective(1000px)
+                    rotateX(${clampedRotateX}deg)
+                    rotateY(${clampedRotateY}deg)
+                    scale(${scaleFactor})
+                `;
+            };
+
+            // =================================================================
+            // === SPLASH SCREEN HIDE LOGIC (Modified for instant reveal) ===
+            // =================================================================
+            const hideSplashAndStartMain = () => {
+                const splashScreen = document.getElementById('splash-screen');
+                const mainWrapper = document.getElementById('page-slider-wrapper');
+                
+                // 1. Play button SFX
+                playSound(SPLASH_BUTTON_SFX_SRC);
+                
+                // 2. FADE OUT SPLASH SCREEN
+                splashScreen.style.opacity = '0';
+                
+                // 3. FADE IN MAIN CONTENT
+                mainWrapper.style.opacity = '1';
+                
+                // 4. Start Background Music
+                window.startAudio(); 
+
+                // 5. Cleanup splash element after transition
+                setTimeout(() => {
+                    splashScreen.style.visibility = 'hidden';
+                    splashScreen.remove(); // Optional: remove from DOM entirely
+                }, 400); 
+            };
+
+
+            // --- Main DOM Content Loaded Listener ---
+            document.addEventListener('DOMContentLoaded', () => {
+                const card = document.getElementById('tilt-card');
+                const body = document.body; 
+                const buttons = document.querySelectorAll('.glowing-btn');
+                const viewButton = document.getElementById('view-button');
+                
+                bgMusic = document.getElementById('bgMusic'); 
+                
+                // Initial setup for the main page (it starts hidden)
+                createDots();
+
+                const scaleFactor = 1.05;
+                card.style.transform = `
+                    perspective(1000px)
+                    rotateX(0deg)
+                    rotateY(0deg)
+                    scale(${scaleFactor})
+                `;
+
+                // --- SPLASH BUTTON Listener ---
+                viewButton.addEventListener('click', hideSplashAndStartMain);
+                
+                // --- Main Page Button Event Listeners ---
+                buttons.forEach(button => {
+                    button.setAttribute('data-href', button.href);
+                    button.href = "javascript:void(0)"; 
+                    
+                    button.addEventListener('mouseover', () => {
+                        playSound(HOVER_SOUND_SRC);
+                    });
+                    
+                    button.addEventListener('click', (e) => {
+                        e.preventDefault(); 
+                        
+                        const originalHref = button.getAttribute('data-href');
+                        
+                        if (button.id !== 'prev-btn' && button.id !== 'next-btn') {
+                            // Social/External Links
+                            playSound(CLICK_SOUND_SRC);
+                            createConfetti(button); 
+                            
+                            setTimeout(() => {
+                                if (originalHref && originalHref !== '#') {
+                                    window.open(originalHref, button.target || '_self');
+                                }
+                            }, 100); 
+                        } else {
+                            if (button.id === 'next-btn') navigateNext();
+                            if (button.id === 'prev-btn') navigatePrev();
+                        }
+                    });
+                });
+                
+                // --- Keyboard Navigation ---
+                document.addEventListener('keydown', (e) => {
+                    // Only allow keyboard navigation if the splash screen is hidden
+                    if (document.getElementById('splash-screen').style.visibility === 'hidden') {
+                        if (e.key === 'ArrowRight') {
+                            e.preventDefault();
+                            navigateNext();
+                        } else if (e.key === 'ArrowLeft') {
+                            e.preventDefault();
+                            navigatePrev();
+                        }
+                    }
+                });
+
+                // --- Tilt Event Listener ---
+                body.addEventListener('mousemove', handleTilt);
+            });
+        </script>
+    </body>
+</html>
