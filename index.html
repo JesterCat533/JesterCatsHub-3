@@ -7,7 +7,7 @@
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
         <style>
-            /* --- COLOR VARIABLES (Shared) --- */
+            /* --- COLOR VARIABLES IG --- */
             :root {
                 --deep-magenta: #C51162; 
                 --dark-bg: #0A0A0A; 
@@ -16,7 +16,7 @@
                 --page-transition-duration: 400ms; 
             }
 
-            /* --- CORE STYLES --- */
+            /* --- STYLES --- */
             body {
                 cursor: default;
                 width: 100vw; 
@@ -24,11 +24,11 @@
                 overflow: hidden; 
                 display: block; 
                 position: relative;
-                /* Set the base background color before the pattern loads */
+                /* background color */
                 background-color: var(--dark-bg);
             }
 
-            /* --- DOTTED BACKGROUND STYLE (Main Content) --- */
+            /* --- DOTTED BACKGROUND THING --- */
             .bg-pattern {
                 background-color: var(--dark-bg);
                 background-image: radial-gradient(var(--dot-color) 2px, transparent 0);
@@ -40,7 +40,7 @@
                 left: 0;
             }
 
-            /* --- MAIN PAGE COMPONENTS (Unchanged) --- */
+            /* --- MAIN PAGE --- */
             .tilt-card {
                 perspective: 2500px;
                 transform-style: preserve-3d;
@@ -62,7 +62,7 @@
                 display: flex; 
                 align-items: center;
                 justify-content: flex-start; 
-                /* Hide main content until splash is cleared */
+                /* Hides main thingy */
                 opacity: 0; 
                 transition: opacity 0.5s ease-in-out; 
             }
@@ -113,7 +113,7 @@
                 color: #fff;
                 text-shadow: 0 0 8px var(--deep-magenta);
             }
-            /* Glowing Button Styles (Included from previous version) */
+            /* Glowing Buttons */
             .glowing-btn {
                 position: relative;
                 width: 60px;
@@ -164,9 +164,7 @@
                 line-height: 1; 
             }
 
-            /* ---------------------------------------------------- */
-            /* --- SPLASH SCREEN --- */
-            /* ---------------------------------------------------- */
+            /* --- SPLASH SCREEN THINGY --- */
             .splash-overlay {
                 position: fixed;
                 top: 0;
@@ -176,7 +174,7 @@
                 background-color: rgba(0, 0, 0, 0.7); 
                 backdrop-filter: blur(5px);
                 -webkit-backdrop-filter: blur(5px);
-                z-index: 100; /* Ensure it covers everything */
+                z-index: 100; /* covers all :3 */
                 transition: opacity 0.4s ease-out, visibility 0.4s; 
                 display: flex;
                 flex-direction: column;
@@ -187,7 +185,7 @@
                 transition: opacity 0.2s ease-out;
             }
             
-            /* Pulsating Glow Animation */
+            /* Glow stuffs */
             @keyframes pulse-glow {
                 0%, 100% { 
                     text-shadow: 0 0 5px rgba(197, 17, 98, 0.5), 0 0 10px rgba(197, 17, 98, 0.2); 
@@ -205,7 +203,7 @@
                 animation-delay: 0.5s;
             }
 
-            /* VIEW Button Styling */
+            /* Button Styles */
             .view-btn {
                 position: relative;
                 width: 200px; 
@@ -346,7 +344,7 @@
                     Here u can uh, read about me and my stuffs ig -3-
                 </p>
                 <p class="text-lg text-gray-300 text-center">
-                    Took a bit of insperation from my good friend t3mp &gt;3&lt; go check him out aswell! --&gt; <a href="https://www.t3mp.co.uk/?i=1" target="_blank" class="interactive-text">t3mp &lt;3</a>
+                    Took a bit of inspiration from my good friend t3mp &gt;3&lt; go check him out aswell! --&gt; <a href="https://www.t3mp.co.uk/?i=1" target="_blank" class="interactive-text">t3mp &lt;3</a>
                 </p>
             </div>
             <button id="view-button" class="view-btn">
@@ -365,9 +363,9 @@
 
             const HOVER_SOUND_SRC = 'hover.mp3';
             const CLICK_SOUND_SRC = 'click.mp3';
-            const SPLASH_BUTTON_SFX_SRC = 'click.mp3'; // Using click.mp3 for the splash button
+            const SPLASH_BUTTON_SFX_SRC = 'click.mp3';
 
-            // --- Function to start Background Music ---
+            // --- Background Music ---
             window.startAudio = function() {
                 if (audioStarted) return;
                 
@@ -384,16 +382,14 @@
                 }
             };
             
-            // --- SFX Playback Function ---
+            // --- SFX ---
             const playSound = (src) => {
                 const audio = new Audio(src);
                 audio.volume = 1.0; 
                 audio.play().catch(e => console.log("SFX playback failed:", e));
             };
 
-            // =================================================================
-            // === Confetti Hearts Logic (Unchanged) ===
-            // =================================================================
+            // --- Confetti thing (not working rn oofie) ---
             const createConfetti = (button) => {
                 const rect = button.getBoundingClientRect();
                 const container = document.getElementById('confetti-container');
@@ -437,10 +433,8 @@
                     }, 100); 
                 }
             };
-            // =================================================================
 
-
-            // --- Page Navigation Logic (Unchanged) ---
+            // --- Navigation ---
             const updatePage = (newIndex) => {
                 if (isTransitioning) return;
                 
@@ -468,7 +462,7 @@
             const navigateNext = () => updatePage(currentPage + 1);
             const navigatePrev = () => updatePage(currentPage - 1);
 
-            // --- Dot Indicator Logic (Unchanged) ---
+            // --- Dots ---
             const createDots = () => {
                 const container = document.getElementById('dot-container');
                 container.innerHTML = ''; 
@@ -491,7 +485,7 @@
                 });
             };
             
-            // --- Tilt Logic (Unchanged) ---
+            // --- Tilt ---
             const handleTilt = (e) => {
                 if (currentPage !== 0) return; 
                 const card = document.getElementById('tilt-card');
@@ -519,34 +513,32 @@
                 `;
             };
 
-            // =================================================================
-            // === SPLASH SCREEN HIDE LOGIC (Modified for instant reveal) ===
-            // =================================================================
+            // --- SPLASH SCREEN HIDE STUFF ---
             const hideSplashAndStartMain = () => {
                 const splashScreen = document.getElementById('splash-screen');
                 const mainWrapper = document.getElementById('page-slider-wrapper');
                 
-                // 1. Play button SFX
+                // 1 Play button SFX
                 playSound(SPLASH_BUTTON_SFX_SRC);
                 
-                // 2. FADE OUT SPLASH SCREEN
+                // 2 FADE OUT SPLASH SCREEN
                 splashScreen.style.opacity = '0';
                 
-                // 3. FADE IN MAIN CONTENT
+                // 3 FADE IN MAIN CONTENT
                 mainWrapper.style.opacity = '1';
                 
-                // 4. Start Background Music
+                // 4 Start Background Music
                 window.startAudio(); 
 
-                // 5. Cleanup splash element after transition
+                // 5 Clean up splash thing
                 setTimeout(() => {
                     splashScreen.style.visibility = 'hidden';
-                    splashScreen.remove(); // Optional: remove from DOM entirely
+                    splashScreen.remove();
                 }, 400); 
             };
 
 
-            // --- Main DOM Content Loaded Listener ---
+            // --- Main Content ---
             document.addEventListener('DOMContentLoaded', () => {
                 const card = document.getElementById('tilt-card');
                 const body = document.body; 
@@ -555,7 +547,7 @@
                 
                 bgMusic = document.getElementById('bgMusic'); 
                 
-                // Initial setup for the main page (it starts hidden)
+                // setup for main page
                 createDots();
 
                 const scaleFactor = 1.05;
@@ -566,10 +558,10 @@
                     scale(${scaleFactor})
                 `;
 
-                // --- SPLASH BUTTON Listener ---
+                // --- SPLASH BUTTON ---
                 viewButton.addEventListener('click', hideSplashAndStartMain);
                 
-                // --- Main Page Button Event Listeners ---
+                // --- Main Page Button ---
                 buttons.forEach(button => {
                     button.setAttribute('data-href', button.href);
                     button.href = "javascript:void(0)"; 
@@ -584,7 +576,7 @@
                         const originalHref = button.getAttribute('data-href');
                         
                         if (button.id !== 'prev-btn' && button.id !== 'next-btn') {
-                            // Social/External Links
+                            // Social Links
                             playSound(CLICK_SOUND_SRC);
                             createConfetti(button); 
                             
@@ -600,9 +592,8 @@
                     });
                 });
                 
-                // --- Keyboard Navigation ---
+                // --- More Navigation ---
                 document.addEventListener('keydown', (e) => {
-                    // Only allow keyboard navigation if the splash screen is hidden
                     if (document.getElementById('splash-screen').style.visibility === 'hidden') {
                         if (e.key === 'ArrowRight') {
                             e.preventDefault();
@@ -614,9 +605,10 @@
                     }
                 });
 
-                // --- Tilt Event Listener ---
+                // --- Tilt ---
                 body.addEventListener('mousemove', handleTilt);
             });
         </script>
     </body>
+
 </html>
